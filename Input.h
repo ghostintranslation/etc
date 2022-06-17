@@ -31,6 +31,7 @@ inline Input::Input(byte index): AudioStream(0, NULL){
     this->index = 8;
   }
 
+  // TODO: Move code of the init in the constructor so it executes only once?
   InputsManager::getInstance()->init();
 
 //  this->active = true;
