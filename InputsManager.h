@@ -1,7 +1,3 @@
-// Head = writing index/pointer
-// Tail = reading index/pointer
-// voir play_queue sur github
-
 #ifndef InputsManager_h
 #define InputsManager_h
 
@@ -14,6 +10,12 @@
 //  uint16_t period = 0;
 //} audio_block;
 
+/**
+ * The manager for the inputs.
+ * Handles the multiplexer and DMA in order to read one value and then switch the multiplexer
+ * at 44100 * 8 Hz. Fills all 8 inputs buffer that are read by the Input objects in 2.9ms as
+ * required by the audio library.
+ */
 class InputsManager
 {
   public:
