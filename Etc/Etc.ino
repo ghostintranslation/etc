@@ -34,6 +34,10 @@ void setup() {
 //  input1 = new Input(2);
   
   AudioNoInterrupts();
+
+//  input1.setOnChange(onInputChange);
+  input1.setOnGateOpen(onInputGateOpen);
+  input1.setOnGateClose(onInputGateClose);
   
   waveform1.frequency(500);
   waveform1.amplitude(1);
@@ -111,4 +115,16 @@ void loop() {
 //    // Set the latch to high (shift registers actually set their pins and stop listening)
 //    digitalWrite(REGISTERS_LATCH_PIN, HIGH); 
 //  }
+}
+
+void onInputChange(Input* input){
+  Serial.println(input->getValue());
+}
+
+void onInputGateOpen(Input* input){
+  Serial.println("Gate open");
+}
+
+void onInputGateClose(Input* input){
+  Serial.println("Gate close");
 }

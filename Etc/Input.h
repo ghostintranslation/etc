@@ -21,6 +21,9 @@ class Input: public AudioStream
     void init();
     void update(void);
     int16_t getValue();
+    void setOnChange(InputCallback changeCallback);
+    void setOnGateOpen(InputCallback gateOpenCallback);
+    void setOnGateClose(InputCallback gateCloseCallback);
     
   private:
     byte index = 0;
@@ -45,7 +48,7 @@ inline Input::Input(byte index): AudioStream(0, NULL){
   // TODO: Move code of the init in the constructor so it executes only once?
   InputsManager::getInstance()->init();
 
-//  this->active = true;
+  this->active = true;
 }
 
 inline void Input::update(void){
@@ -106,9 +109,9 @@ inline void Input::update(void){
     
     // Triggering Gate
     if(this->gateOpenCallback != nullptr){
-      if(this->value > INT16_MAX / 2 && this->prevValue < INT16_MAX){
+      if(this->value > INT16_MAX / 2 && this->prevValue < INT16_MAX / 2){
         this->gateOpenCallback(this);
-      }else{
+      }else if(this->value < INT16_MAX / 2 && this->prevValue > INT16_MAX / 2){
         this->gateCloseCallback(this);
       }
     }
@@ -119,6 +122,8 @@ inline void Input::update(void){
         this->changeCallback(this);
       }
     }
+
+    this->prevValue = this->value;
 
     transmit(block, 0);
     transmit(triggerBlock, 1);
