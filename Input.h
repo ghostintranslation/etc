@@ -4,6 +4,11 @@
 #include "AudioStream.h"
 #include "InputsManager.h"
 
+// Forward declaration
+class Input;
+
+using InputCallback = void (*)(Input* input);
+
 /**
  * Physical input object
  * 0 inputs
@@ -15,14 +20,20 @@ class Input: public AudioStream
     Input(byte index);
     void init();
     void update(void);
-    unsigned int getValue();
+    int16_t getValue();
     
   private:
     byte index = 0;
-    unsigned int value = 0;
+    int16_t value = 0;
+    int16_t prevValue = 0;
 
     // The number of samples the trigger has been on
     byte triggerOnSamples = 0;
+
+    // Callbacks
+    InputCallback changeCallback = nullptr;
+    InputCallback gateOpenCallback = nullptr;
+    InputCallback gateCloseCallback = nullptr;
 };
 
 inline Input::Input(byte index): AudioStream(0, NULL){
@@ -88,11 +99,26 @@ inline void Input::update(void){
       // Gate output
       gateBlock->data[i] = inputBuffer[i] > INT16_MAX / 2 ? INT16_MAX : 0; // 32767 / 2
 
-      avg+=block->data[i];
+      // Aproximated moving average
+      this->value -= this->value / AUDIO_BLOCK_SAMPLES;
+      this->value += block->data[i] / AUDIO_BLOCK_SAMPLES;
     }
     
-    // Average value
-    this->value = avg/AUDIO_BLOCK_SAMPLES;
+    // Triggering Gate
+    if(this->gateOpenCallback != nullptr){
+      if(this->value > INT16_MAX / 2 && this->prevValue < INT16_MAX){
+        this->gateOpenCallback(this);
+      }else{
+        this->gateCloseCallback(this);
+      }
+    }
+
+    // Triggering Change
+    if(this->changeCallback != nullptr){
+      if(this->value != this->prevValue){
+        this->changeCallback(this);
+      }
+    }
 
     transmit(block, 0);
     transmit(triggerBlock, 1);
@@ -104,7 +130,31 @@ inline void Input::update(void){
   release(gateBlock);
 }
 
-inline unsigned int Input::getValue(){
+inline int16_t Input::getValue(){
   return this->value;
+}
+
+/**
+ * Set the callback function to call when the value changes
+ */
+inline void Input::setOnChange(InputCallback changeCallback)
+{
+    this->changeCallback = changeCallback;
+}
+
+/**
+ * 
+ */
+inline void Input::setOnGateOpen(InputCallback gateOpenCallback)
+{
+    this->gateOpenCallback = gateOpenCallback;
+}
+
+/**
+ * 
+ */
+inline void Input::setOnGateClose(InputCallback gateCloseCallback)
+{
+    this->gateCloseCallback = gateCloseCallback;
 }
 #endif

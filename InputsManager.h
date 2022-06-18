@@ -280,7 +280,8 @@ inline void InputsManager::dmaInterrupt(){
   dmachannel.clearInterrupt();  // tell system we processed it.
   asm("DSB");                   // this is a memory barrier
 
-  getInstance()->buffers[getInstance()->muxIndex]->write(testdest*8);
+  // Multiplying by 8 because ADC range is unsigned 12bits = 4096, but audio lib range is signed 16bits = 32768
+  getInstance()->buffers[getInstance()->muxIndex]->write(testdest * 8);
  
   getInstance()->iterate();
 
