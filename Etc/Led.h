@@ -28,6 +28,11 @@ class Led: public IO, public Registrar<Led>
     uint16_t value = 0;
     uint16_t brightness = ABSOLUTE_ANALOG_MAX;
 
+    Status status = Off;
+
+    // Time counter for the blinking
+    elapsedMillis blickClock;
+
 };
 
 inline Led::Led(byte index): IO(index, 1, inputQueueArray) {
@@ -57,22 +62,63 @@ inline void Led::update(void) {
 
   release(block);
 
+  // Setting target according to status and brightness
+  switch (this->status)
+  {
+  case Blink:
+    if (this->blickClock % 400 < 200)
+    {
+      this->target = 0;
+    }
+    else
+    {
+      this->target = this->brightness;
+    }
+    break;
+  case BlinkFast:
+    if (this->blickClock % 200 < 100)
+    {
+      this->target = 0;
+    }
+    else
+    {
+      this->target = this->brightness;
+    }
+    break;
+  case BlinkOnce:
+    if (this->blickClock > 100)
+    {
+      this->target = 0;
+    }else{
+      this->target = this->brightness;
+    }
+    break;
 
-  // TODO: NOW SET TARGET ACCORDING TO STATUS AND BRIGHTNESS
+  default:
+      this->target = this->brightness;
+    break;
+  }
 }
 
 inline void Led::set(Led::Status status, uint16_t brightness) {
-  // Limiting the brightness value
-  if(brightness > ABSOLUTE_ANALOG_MAX){
-    brightness = ABSOLUTE_ANALOG_MAX;
-  }
-
-  this->status = status;
-  this->brightness = brightness;
+  this->setStatus(status);
+  this->setBrightness(brightness);
 }
 
 inline void Led::setStatus(Led::Status status) {
   this->status = status;
+
+  switch (this->status)
+  {
+  case Off:
+    this->brightness = 0;
+    break;
+  case BlinkOnce:
+    this->blickClock = 0;
+    break;
+  default:
+    break;
+  }
 }
 
 inline void Led::setBrightness(uint16_t brightness) {
