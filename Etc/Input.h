@@ -1,6 +1,7 @@
 #ifndef Input_h
 #define Input_h
 
+#include "Registrar.h"
 #include "IO.h"
 #include "InputsManager.h"
 
@@ -14,7 +15,7 @@ using InputCallback = void (*)(Input* input);
    0 inputs
    3 outputs: raw, trigger, gate
 */
-class Input: public IO
+class Input: public IO, public Registrar<Led>
 {
   public:
     Input(byte index);
