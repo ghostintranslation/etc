@@ -7,11 +7,13 @@
 #define SPI_MOSI_PIN 11
 
 #include "Input.h"
+#include "Led.h"
 
 
 //Input* input1; 
 
 Input input1(0);
+Led led1(0);
 //Input input2(1);
 //Input input3(2);
 //Input input4(3);
@@ -35,9 +37,9 @@ void setup() {
   
   AudioNoInterrupts();
 
-//  input1.setOnChange(onInputChange);
-  input1.setOnGateOpen(onInputGateOpen);
-  input1.setOnGateClose(onInputGateClose);
+  input1.setOnChange(onInputChange);
+//  input1.setOnGateOpen(onInputGateOpen);
+//  input1.setOnGateClose(onInputGateClose);
   
   waveform1.frequency(500);
   waveform1.amplitude(1);
@@ -118,6 +120,8 @@ void loop() {
 }
 
 void onInputChange(Input* input){
+  Serial.print(input->getTarget());
+  Serial.print(" ");
   Serial.println(input->getValue());
 }
 
