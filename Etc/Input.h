@@ -15,7 +15,7 @@ using InputCallback = void (*)(Input* input);
    0 inputs
    3 outputs: raw, trigger, gate
 */
-class Input: public IO, public Registrar<Led>
+class Input: public IO, public Registrar<Input>
 {
   public:
     Input(byte index);

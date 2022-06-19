@@ -1,6 +1,8 @@
 #ifndef Registrar_h
 #define Registrar_h
 
+#include <iterator>
+
 /**
  * This provides to any derived class a static array of pointers to all instantiated
  * objects of the class.
