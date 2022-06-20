@@ -3,8 +3,7 @@
 
 #include <SPI.h>
 
-// TODO: MOVE THESE SOMEWHERE MORE CENTRAL
-
+#include "Led.h"
 
 class LedManager
 {
@@ -15,6 +14,7 @@ class LedManager
   private:
     // Singleton
     static LedManager *instance;
+    LedManager();
 
     // Update clock
     elapsedMillis clockUpdate;
@@ -69,17 +69,17 @@ inline void LedManager::writeLeds()
 
     // Preparing the LEDs data
     for(uint8_t i = 0; i < Led::getCount(); i++){
-        if (Led::getAll()[i]->getValue() == ABSOLUTE_ANALOG_MIN)
+        if (Led::get(i)->getValue() == ABSOLUTE_ANALOG_MIN)
         {
             continue;
         }
-        else if (Led::getAll()[i]->getValue() == ABSOLUTE_ANALOG_MAX)
+        else if (Led::get(i)->getValue() == ABSOLUTE_ANALOG_MAX)
         {
-            bitSet(ledsData, Led::getAll()[i]->getIndex());
+            bitSet(ledsData, Led::get(i)->getIndex());
         }
-        else if ((float)this->clockPWM / this->intervalPWM < (float)Led::getAll()[i]->getValue() / ABSOLUTE_ANALOG_MAX)
+        else if ((float)this->clockPWM / this->intervalPWM < (float)Led::get(i)->getValue() / ABSOLUTE_ANALOG_MAX)
         {
-            bitSet(ledsData, Led::getAll()[i]->getIndex());
+            bitSet(ledsData, Led::get(i)->getIndex());
         }
     }
 

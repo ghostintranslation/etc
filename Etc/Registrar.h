@@ -16,6 +16,7 @@ class Registrar
 {
   public:
     static void registerEntity(T* entity){
+//      Serial.println("www");
         T** newArr = new T*[count + 1];
         std::copy(entities, entities + std::min(count, count + 1), newArr);
         delete[] entities;
@@ -30,11 +31,11 @@ class Registrar
       registerEntity((T*)this);
     }
     
-    static T** getAll(){ //TODO: RENAME getAll()
+    static T** getAll(){
       return entities;
     }
 
-    static T* get(unsigned int index){ // TODO: RENAME get(unsigned int index)
+    static T* get(unsigned int index){
       return entities[index];
     }
     

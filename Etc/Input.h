@@ -1,9 +1,9 @@
 #ifndef Input_h
 #define Input_h
 
-#include "Registrar.h"
 #include "IO.h"
 #include "InputsManager.h"
+#include "Registrar.h"
 
 // Forward declaration
 class Input;
@@ -68,8 +68,6 @@ inline void Input::update(void) {
   int16_t* inputBuffer = InputsManager::getInstance()->readInput(this->index);
 
   if (inputBuffer != NULL) {
-    unsigned int avg = 0;
-
     for (unsigned int i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
       //      Serial.println(inputBuffer[i]);
 

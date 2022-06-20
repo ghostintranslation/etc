@@ -1,8 +1,8 @@
 #ifndef Led_h
 #define Led_h
 
-#include "Registrar.h"
 #include "IO.h"
+#include "Registrar.h"
 
 class Led: public IO, public Registrar<Led>
 {
@@ -37,7 +37,6 @@ class Led: public IO, public Registrar<Led>
 
 inline Led::Led(byte index): IO(index, 1, inputQueueArray) {
 }
-
 
 inline void Led::update(void) {
   IO::update();
@@ -99,7 +98,6 @@ inline void Led::update(void) {
       this->setTarget(this->brightness);
     break;
   }
-      Serial.println(this->getValue());
 }
 
 inline void Led::set(Led::Status status, uint16_t brightness) {

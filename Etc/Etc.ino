@@ -9,14 +9,14 @@
 #define ABSOLUTE_ANALOG_MIN 0
 #define ABSOLUTE_ANALOG_MAX 32767
 
+
 #include "Input.h"
 #include "Led.h"
+#include "LedManager.h"
 
 
 //Input* input1; 
-
-Input input1(0);
-Led led1(0);
+Led* led1;
 
 AudioSynthWaveformSineModulated       waveform1;
 AudioOutputI2S           i2s1;
@@ -28,9 +28,10 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 5000) ;
 
+
 //  InputsManager::getInstance()->init();
 
-//  input1 = new Input(2);
+  led1 = new Led(0);
   
   AudioNoInterrupts();
 
@@ -38,8 +39,8 @@ void setup() {
 //  input1.setOnGateOpen(onInputGateOpen);
 //  input1.setOnGateClose(onInputGateClose);
 
-  led1.setStatus(Led::Status::BlinkFast);
-  led1.setSmoothing(0);
+  led1->setStatus(Led::Status::On);
+  led1->setSmoothing(0);
   
   waveform1.frequency(1);
   waveform1.amplitude(1);
@@ -52,7 +53,7 @@ void setup() {
 //  new AudioConnection(waveform1, 0, i2s1, 0);
 //  new AudioConnection(waveform1, 0, i2s1, 1);
 
-  new AudioConnection(waveform1, 0, led1, 0);
+  new AudioConnection(waveform1, 0, *led1, 0);
 
   
   sgtl5000_1.enable();
@@ -74,11 +75,13 @@ void setup() {
 elapsedMillis consoleClock;
 byte data595 = 0;
 void loop() {
+  
+  LedManager::getInstance()->update();
 
-  if(consoleClock >= 20){
-//    Serial.println(led1.getTarget());
-    consoleClock = 0;
-  }
+//  if(consoleClock >= 20){
+//    Serial.println(led1->getValue());
+//    consoleClock = 0;
+//  }
   
   
 //  if(consoleClock >= 2){

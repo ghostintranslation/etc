@@ -6,9 +6,9 @@
 class IO: public AudioStream
 {
   public:
-    IO(byte index, uint8_t numberOfInputsPorts, audio_block_t **iqueue);
+    IO(uint8_t index, uint8_t numberOfInputsPorts, audio_block_t **iqueue);
     virtual void update(void);
-
+    virtual uint8_t getIndex();
     virtual int16_t getValue();
     virtual void setValue(int16_t value);
     virtual int16_t getTarget();
@@ -66,6 +66,11 @@ inline void IO::update(void) {
 */
 inline void IO::setSmoothing(uint16_t smoothing) {
   this->smoothing = smoothing;
+}
+
+inline uint8_t IO::getIndex()
+{
+  return this->index;
 }
 
 /**
