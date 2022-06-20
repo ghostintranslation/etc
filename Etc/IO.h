@@ -9,18 +9,18 @@ class IO: public AudioStream
     IO(byte index, uint8_t numberOfInputsPorts, audio_block_t **iqueue);
     virtual void update(void);
 
-    int16_t getValue();
-    void setValue(int16_t value);
-    int16_t getTarget();
-    void setTarget(int16_t target);
-    void setSmoothing(uint16_t smoothing);
+    virtual int16_t getValue();
+    virtual void setValue(int16_t value);
+    virtual int16_t getTarget();
+    virtual void setTarget(int16_t target);
+    virtual void setSmoothing(uint16_t smoothing);
 
   protected:
     uint8_t index;
     int16_t value = 0;
     int16_t prevValue = 0;
     int16_t target = 0;
-    uint16_t smoothing = 100;
+    uint16_t smoothing = 10;
 
 };
 

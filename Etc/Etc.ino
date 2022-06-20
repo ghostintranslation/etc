@@ -7,7 +7,7 @@
 #define SPI_MOSI_PIN 11
 // The audio library uses signed int16_t but inputs and Leds can only have positive values
 #define ABSOLUTE_ANALOG_MIN 0
-#define ABSOLUTE_ANALOG_MAX 2^15 -1 
+#define ABSOLUTE_ANALOG_MAX 32767
 
 #include "Input.h"
 #include "Led.h"
@@ -17,13 +17,7 @@
 
 Input input1(0);
 Led led1(0);
-//Input input2(1);
-//Input input3(2);
-//Input input4(3);
-//Input input5(4);
-//Input input6(5);
-//Input input7(6);
-//Input input8(7);
+
 AudioSynthWaveformSineModulated       waveform1;
 AudioOutputI2S           i2s1;
 AudioControlSGTL5000     sgtl5000_1;     //xy=930,518
@@ -40,11 +34,14 @@ void setup() {
   
   AudioNoInterrupts();
 
-  input1.setOnChange(onInputChange);
+//  input1.setOnChange(onInputChange);
 //  input1.setOnGateOpen(onInputGateOpen);
 //  input1.setOnGateClose(onInputGateClose);
+
+  led1.setStatus(Led::Status::BlinkFast);
+  led1.setSmoothing(0);
   
-  waveform1.frequency(500);
+  waveform1.frequency(1);
   waveform1.amplitude(1);
 //  waveform1.begin(WAVEFORM_TRIANGLE);
 
@@ -52,16 +49,10 @@ void setup() {
   
 //  new AudioConnection(input1, 0, i2s1, 0);
 //  new AudioConnection(input2, 0, waveform1, 0);
-  new AudioConnection(waveform1, 0, i2s1, 0);
-  new AudioConnection(waveform1, 0, i2s1, 1);
-//  new AudioConnection(input3, 0, i2s1, 0);
-//  new AudioConnection(input4, 0, i2s1, 1);
-//  new AudioConnection(input5, 0, i2s1, 0);
-//  new AudioConnection(input6, 0, i2s1, 1);
-//  new AudioConnection(input7, 0, i2s1, 0);
-//  new AudioConnection(input8, 0, i2s1, 1);
 //  new AudioConnection(waveform1, 0, i2s1, 0);
 //  new AudioConnection(waveform1, 0, i2s1, 1);
+
+  new AudioConnection(waveform1, 0, led1, 0);
 
   
   sgtl5000_1.enable();
@@ -84,6 +75,12 @@ elapsedMillis consoleClock;
 byte data595 = 0;
 void loop() {
 
+  if(consoleClock >= 20){
+//    Serial.println(led1.getTarget());
+    consoleClock = 0;
+  }
+  
+  
 //  if(consoleClock >= 2){
 //    Serial.printf("%d,%d,%d,%d,%d,%d,%d,%d", input1.getValue(), input2.getValue(), input3.getValue(), input4.getValue(), input5.getValue(), input6.getValue(), input7.getValue(), input8.getValue()); 
 //    Serial.println("");
@@ -123,9 +120,9 @@ void loop() {
 }
 
 void onInputChange(Input* input){
-  Serial.print(input->getTarget());
-  Serial.print(" ");
-  Serial.println(input->getValue());
+//  Serial.print(input->getTarget());
+//  Serial.print(" ");
+//  Serial.println(input->getValue());
 }
 
 void onInputGateOpen(Input* input){

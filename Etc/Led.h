@@ -17,7 +17,7 @@ class Led: public IO, public Registrar<Led>
     };
     
     Led(byte index);
-    void update(void);
+    void update(void) override;
     void set(Led::Status status, uint16_t brightness);
     void setStatus(Led::Status status);
     void setBrightness(uint16_t brightness);
@@ -45,22 +45,23 @@ inline void Led::update(void) {
   // Receive input data
   audio_block_t *block;
   block = receiveReadOnly(0);
-  if (!block) return;
-
-  for (uint8_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
-    int16_t x = block->data[i];
-    
-    // Cutting off negative values
-    if(x < 0){
-      x = 0;
+  
+  if (block){
+    for (uint8_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
+      int16_t x = block->data[i];
+      
+      // Cutting off negative values
+      if(x < 0){
+        x = 0;
+      }
+  
+      // Aproximated moving average
+      this->brightness -= this->brightness / AUDIO_BLOCK_SAMPLES;
+      this->brightness += x / AUDIO_BLOCK_SAMPLES;
     }
-
-    // Aproximated moving average
-    this->brightness -= this->brightness / AUDIO_BLOCK_SAMPLES;
-    this->brightness += x / AUDIO_BLOCK_SAMPLES;
+  
+    release(block);
   }
-
-  release(block);
 
   // Setting target according to status and brightness
   switch (this->status)
@@ -68,36 +69,37 @@ inline void Led::update(void) {
   case Blink:
     if (this->blickClock % 400 < 200)
     {
-      this->target = 0;
+      this->setTarget(0);
     }
     else
     {
-      this->target = this->brightness;
+      this->setTarget(this->brightness);
     }
     break;
   case BlinkFast:
     if (this->blickClock % 200 < 100)
     {
-      this->target = 0;
+      this->setTarget(0);
     }
     else
     {
-      this->target = this->brightness;
+      this->setTarget(this->brightness);
     }
     break;
   case BlinkOnce:
     if (this->blickClock > 100)
     {
-      this->target = 0;
+      this->setTarget(0);
     }else{
-      this->target = this->brightness;
+      this->setTarget(this->brightness);
     }
     break;
 
   default:
-      this->target = this->brightness;
+      this->setTarget(this->brightness);
     break;
   }
+      Serial.println(this->getValue());
 }
 
 inline void Led::set(Led::Status status, uint16_t brightness) {
