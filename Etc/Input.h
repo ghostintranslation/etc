@@ -42,11 +42,15 @@ class Input: public IO, public Registrar<Input>
 
     // MIDI
     uint8_t midiCC = 0;
+    uint16_t midiValue = 0;
 
     // Callbacks
     InputCallback changeCallback = nullptr;
     InputCallback gateOpenCallback = nullptr;
     InputCallback gateCloseCallback = nullptr;
+
+    // Midi callback
+    void onMidiCC(uint16_t value);
 };
 
 inline Input::Input(byte index): IO(index, 0, NULL) {
@@ -111,11 +115,23 @@ inline void Input::update(void) {
       this->target += block->data[i] / AUDIO_BLOCK_SAMPLES;
     }
 
+    // Merging the ADC and Midi values to form the target value
+    switch(this->mergeMode){
+      case Multiply:
+        this->target *= this->midiValue;
+      break;
+
+      case Add:
+      default:
+        this->target += this->midiValue;
+      break;
+    }
+
     // Triggering Gate
     if (this->gateOpenCallback != nullptr) {
-      if (this->target > INT16_MAX / 2 && this->prevValue < INT16_MAX / 2) {
+      if (this->value > INT16_MAX / 2 && this->prevValue < INT16_MAX / 2) {
         this->gateOpenCallback(this);
-      } else if (this->target < INT16_MAX / 2 && this->prevValue > INT16_MAX / 2) {
+      } else if (this->value < INT16_MAX / 2 && this->prevValue > INT16_MAX / 2) {
         this->gateCloseCallback(this);
       }
     }
@@ -165,17 +181,21 @@ inline void Input::setOnGateClose(InputCallback gateCloseCallback)
 
 inline void Input::setMidiCC(byte midiCC){
   // If a callback is already registered for this input, remove it
-  if(MidiManager::isExistControlChangeCallback(this->midiChange, this->midiCC)){
-    MidiManager::removeControlChangeCallback(this->midiChange, this->midiCC);
+  if(MidiManager::isExistControlChangeCallback(this->onMidiCC, this->midiCC)){
+    MidiManager::removeControlChangeCallback(this->onMidiCC, this->midiCC);
   }
 
   // Register the callback for this input on the specified CC number
-  MidiManager::addControlChangeCallback(this->midiChange, midiCC);
+  MidiManager::addControlChangeCallback(this->onMidiCC, midiCC);
 
   this->midiCC = midiCC;
 }
 
 inline void Input::setMergeMode(MergeMode mergeMode){
   this->mergeMode = mergeMode;
+}
+
+inline void Input::onMidiCC(uint16_t value){
+  this->midiValue = value;
 }
 #endif

@@ -1,6 +1,11 @@
 #ifndef MidiManager_h
 #define MidiManager_h
 
+#include <vector>
+#include <MIDI.h>
+
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
+
 using MidiControlChangeCallbackFunction = void (*)(uint16_t);
 
 struct MidiControlChangeCallback{
@@ -34,6 +39,8 @@ inline MidiManager::MidiManager(){
   MIDI.setHandleControlChange(getInstance()->handleMidiControlChange);
   MIDI.begin();
   usbMIDI.setHandleControlChange(getInstance()->handleMidiControlChange);
+
+  Serial1.begin(31250, SERIAL_8N1_RXINV);
 }
 
 /**
