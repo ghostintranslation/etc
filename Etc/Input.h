@@ -18,16 +18,30 @@ using InputCallback = void (*)(Input* input);
 class Input: public IO, public Registrar<Input>
 {
   public:
+    enum MergeMode
+    {
+      Add,
+      Multiply
+    };
+
     Input(byte index);
     void init();
     virtual void update(void) override;
     void setOnChange(InputCallback changeCallback);
     void setOnGateOpen(InputCallback gateOpenCallback);
     void setOnGateClose(InputCallback gateCloseCallback);
+    void setMidiCC(byte midiCC);
+    void setMergeMode(MergeMode mergeMode);
 
   private:
     // The number of samples the trigger has been on
     byte triggerOnSamples = 0;
+
+    // How to merge ADC and MIDI values
+    MergeMode mergeMode = Add;
+
+    // MIDI
+    uint8_t midiCC = 0;
 
     // Callbacks
     InputCallback changeCallback = nullptr;
@@ -147,5 +161,21 @@ inline void Input::setOnGateOpen(InputCallback gateOpenCallback)
 inline void Input::setOnGateClose(InputCallback gateCloseCallback)
 {
   this->gateCloseCallback = gateCloseCallback;
+}
+
+inline void Input::setMidiCC(byte midiCC){
+  // If a callback is already registered for this input, remove it
+  if(MidiManager::isExistControlChangeCallback(this->midiChange, this->midiCC)){
+    MidiManager::removeControlChangeCallback(this->midiChange, this->midiCC);
+  }
+
+  // Register the callback for this input on the specified CC number
+  MidiManager::addControlChangeCallback(this->midiChange, midiCC);
+
+  this->midiCC = midiCC;
+}
+
+inline void Input::setMergeMode(MergeMode mergeMode){
+  this->mergeMode = mergeMode;
 }
 #endif

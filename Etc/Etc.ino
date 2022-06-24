@@ -63,8 +63,8 @@ void setup() {
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE0);
   SPI.setClockDivider(SPI_CLOCK_DIV2);
-    SPI.setSCK(SPI_CLOCK_PIN);
-    SPI.setMOSI(SPI_MOSI_PIN);
+  SPI.setSCK(SPI_CLOCK_PIN);
+  SPI.setMOSI(SPI_MOSI_PIN);
   SPI.begin();
   
   AudioInterrupts();
