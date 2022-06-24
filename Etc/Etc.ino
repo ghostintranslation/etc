@@ -10,9 +10,7 @@
 #define ABSOLUTE_ANALOG_MAX 32767
 
 
-#include "Input.h"
-#include "Led.h"
-#include "LedManager.h"
+#include "ETC.h"
 
 
 //Input* input1; 
@@ -40,9 +38,9 @@ void setup() {
 //  input1.setOnGateClose(onInputGateClose);
 
   led1->setStatus(Led::Status::On);
-  led1->setSmoothing(0);
+  led1->setSmoothing(100);
   
-  waveform1.frequency(1);
+  waveform1.frequency(0.5);
   waveform1.amplitude(1);
 //  waveform1.begin(WAVEFORM_TRIANGLE);
 
@@ -76,7 +74,6 @@ elapsedMillis consoleClock;
 byte data595 = 0;
 void loop() {
   
-  LedManager::getInstance()->update();
 
 //  if(consoleClock >= 20){
 //    Serial.println(led1->getValue());

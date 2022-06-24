@@ -4,6 +4,8 @@
 #include "IO.h"
 #include "Registrar.h"
 
+class LedManager;
+
 class Led: public IO, public Registrar<Led>
 {
   public:
