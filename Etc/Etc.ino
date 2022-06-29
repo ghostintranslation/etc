@@ -1,17 +1,11 @@
 #include <Audio.h>
 #include <SPI.h>
 
-
 #define REGISTERS_LATCH_PIN 9
 #define SPI_CLOCK_PIN 13
 #define SPI_MOSI_PIN 11
-// The audio library uses signed int16_t but inputs and Leds can only have positive values
-#define ABSOLUTE_ANALOG_MIN 0
-#define ABSOLUTE_ANALOG_MAX 32767
-
 
 #include "ETC.h"
-
 
 //Input* input1; 
 Led* led1;

@@ -5,6 +5,9 @@
 #include "Led.h"
 #include "LedManager.h"
 
+#define ABSOLUTE_ANALOG_MIN -32768
+#define ABSOLUTE_ANALOG_MAX 32767
+
 class ETC
 {
   public:
