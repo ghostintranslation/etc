@@ -77,9 +77,13 @@ inline void MidiManager::update(){
 }
 
 inline void handleMidiControlChange(byte channel, byte control, byte value){
+  // This value is converted from the MIDI range of unsigned 8 bits to a signed 16 bits range to match
+  // the audio library's blocks samples range. So a 0 value is now -32768.
+  int16_t newValue = value * 256 - 32768;
+
   for(MidiControlChangeCallback i : this->midiControlChangeCallbacks){
     if(i.control == control && i.callback != nullptr){
-      i.callback(value);
+      i.callback(newValue);
     }
   }
 }

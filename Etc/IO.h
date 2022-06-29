@@ -39,6 +39,7 @@ inline void IO::update(void) {
   // Update the value to reach the target
   if (this->target != this->value)
   {
+    // If no smoothing no need to run any maths
     if (this->smoothing == 0)
     {
       this->value = this->target;
@@ -54,7 +55,7 @@ inline void IO::update(void) {
 
 /**
    The smoothing is non linear, it uses the difference between target and value.
-   The bigger the difference the bigger the increment.
+   The bigger the difference the bigger the increments.
    
    0 = no smoothing
    

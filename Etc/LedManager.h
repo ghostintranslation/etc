@@ -77,7 +77,8 @@ inline void LedManager::writeLeds()
         {
             bitSet(ledsData, Led::get(i)->getIndex());
         }
-        else if ((float)this->clockPWM / this->intervalPWM < (float)Led::get(i)->getValue() / ABSOLUTE_ANALOG_MAX)
+        // The value is a int16_t, offseting it to uint16_t in order to run this comparison
+        else if ((float)this->clockPWM / this->intervalPWM < (float)(Led::get(i)->getValue() + ABSOLUTE_ANALOG_MAX) / (ABSOLUTE_ANALOG_MAX*2))
         {
             bitSet(ledsData, Led::get(i)->getIndex());
         }

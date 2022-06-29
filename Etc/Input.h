@@ -42,7 +42,7 @@ class Input: public IO, public Registrar<Input>
 
     // MIDI
     uint8_t midiCC = 0;
-    uint16_t midiValue = 0;
+    int16_t midiValue = 0;
 
     // Callbacks
     InputCallback changeCallback = nullptr;
@@ -50,7 +50,7 @@ class Input: public IO, public Registrar<Input>
     InputCallback gateCloseCallback = nullptr;
 
     // Midi callback
-    void onMidiCC(uint16_t value);
+    void onMidiCC(int16_t value);
 };
 
 inline Input::Input(byte index): IO(index, 0, NULL) {
@@ -129,9 +129,9 @@ inline void Input::update(void) {
 
     // Triggering Gate
     if (this->gateOpenCallback != nullptr) {
-      if (this->value > INT16_MAX / 2 && this->prevValue < INT16_MAX / 2) {
+      if (this->value > 0 && this->prevValue < 0) {
         this->gateOpenCallback(this);
-      } else if (this->value < INT16_MAX / 2 && this->prevValue > INT16_MAX / 2) {
+      } else if (this->value < 0 && this->prevValue > 0) {
         this->gateCloseCallback(this);
       }
     }
@@ -195,7 +195,7 @@ inline void Input::setMergeMode(MergeMode mergeMode){
   this->mergeMode = mergeMode;
 }
 
-inline void Input::onMidiCC(uint16_t value){
+inline void Input::onMidiCC(int16_t value){
   this->midiValue = value;
 }
 #endif

@@ -36,7 +36,7 @@ class InputsManager
     void iterate();
     
     static DMAChannel dmachannel;
-    static uint32_t testdest;
+    static uint32_t dmaValue;
     static const byte inputsCount = 8;
     byte muxIndex = 0;
     static const uint32_t buffSize = AUDIO_BLOCK_SAMPLES;
@@ -135,7 +135,7 @@ extern "C" void xbar_connect(unsigned int input, unsigned int output);
 
 
 DMAChannel InputsManager::dmachannel(false);
-uint32_t InputsManager::testdest = 0;
+uint32_t InputsManager::dmaValue = 0;
 
 // Singleton pre init
 InputsManager * InputsManager::instance = nullptr;
@@ -218,7 +218,7 @@ pinMode(A0, INPUT);
 //  
 //  dmachannel.TCD->SADDR = &(IMXRT_ADC_ETC.TRIG[4].RESULT_1_0);
 ////  dmachannel.destinationBuffer( dmaBuffer, DMABUFFER_SIZE * 4 );
-//  dmachannel.destination(testdest);
+//  dmachannel.destination(dmaValue);
 //  dmachannel.interruptAtCompletion();  
 //  dmachannel.attachInterrupt( dmaInterrupt );
 //  dmachannel.transferSize(4);
@@ -246,7 +246,7 @@ pinMode(A0, INPUT);
 //  dmachannel.TCD->BITER_ELINKNO = sizeof(adc_buffer) / 2;
   dmachannel.TCD->CSR = 0;
   dmachannel.triggerAtHardwareEvent(DMAMUX_SOURCE_ADC_ETC);
-  dmachannel.destination(this->testdest);
+  dmachannel.destination(this->dmaValue);
   dmachannel.interruptAtCompletion();  
   dmachannel.transferSize(2);
   dmachannel.transferCount(1);
@@ -280,9 +280,12 @@ inline void InputsManager::dmaInterrupt(){
   dmachannel.clearInterrupt();  // tell system we processed it.
   asm("DSB");                   // this is a memory barrier
 
-  // Multiplying by 8 because ADC range is unsigned 12bits = 4096, but audio lib range is signed 16bits = 32768
-  getInstance()->buffers[getInstance()->muxIndex]->write(testdest * 8);
+  // Storing the value in the right buffer
+  // This value is converted from the ADC range of unsigned 12 bits to a signed 16 bits range to match
+  // the audio library's blocks samples range. So a GND value is now -32768.
+  getInstance()->buffers[getInstance()->muxIndex]->write(dmaValue * 16 - 32768);
  
+  // Switching to the next input
   getInstance()->iterate();
 
 //   int16_t* block = getInstance()->buffers[2]->read();
