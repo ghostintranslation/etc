@@ -2,11 +2,14 @@
 #define MidiManager_h
 
 #include <vector>
+#include <algorithm>
+#include <functional>
 #include <MIDI.h>
+#include "Input.h"
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
 
-using MidiControlChangeCallbackFunction = void (*)(uint16_t);
+using MidiControlChangeCallbackFunction = void (*)(int16_t);
 
 struct MidiControlChangeCallback{
   byte control;
@@ -17,17 +20,19 @@ class MidiManager
 {
   public:
     static MidiManager *getInstance();
-    void addControlChangeCallback(ControlChangeCallback fptr, )
+    void addControlChangeCallback(byte control, MidiControlChangeCallbackFunction fptr);
+    void removeControlChangeCallback(MidiControlChangeCallbackFunction fptr, byte control);
+    bool isExistControlChangeCallback(MidiControlChangeCallbackFunction fptr, byte control);
     void update();
+    std::vector<MidiControlChangeCallback> midiControlChangeCallbacks;
 
   private:
     // Singleton
     static MidiManager *instance;
     MidiManager();
 
-    std::vector<MidiControlChangeCallback> midiControlChangeCallbacks;
 
-    void handleMidiControlChange(byte channel, byte control, byte value);
+    static void handleMidiControlChange(byte channel, byte control, byte value);
 };
 
 // Singleton pre init
@@ -36,9 +41,9 @@ MidiManager * MidiManager::instance = nullptr;
 inline MidiManager::MidiManager(){
 
   // MIDI init
-  MIDI.setHandleControlChange(getInstance()->handleMidiControlChange);
+  MIDI.setHandleControlChange(handleMidiControlChange);
   MIDI.begin();
-  usbMIDI.setHandleControlChange(getInstance()->handleMidiControlChange);
+  usbMIDI.setHandleControlChange(handleMidiControlChange);
 
   Serial1.begin(31250, SERIAL_8N1_RXINV);
 }
@@ -52,21 +57,24 @@ inline MidiManager *MidiManager::getInstance() {
   return instance;
 }
 
-inline void MidiManager::addControlChangeCallback(MidiControlChangeCallbackFunction fptr, byte control){
+inline void MidiManager::addControlChangeCallback(byte control, MidiControlChangeCallbackFunction fptr){
   this->midiControlChangeCallbacks.push_back({
     control: control,
     callback: fptr
   });
 }
 
+  
 inline void MidiManager::removeControlChangeCallback(MidiControlChangeCallbackFunction fptr, byte control){
-  this->midiControlChangeCallbacks.erase(std::remove(this->midiControlChangeCallbacks.begin(), this->midiControlChangeCallbacks.end(), {control: control, callback: fptr}), this->midiControlChangeCallbacks.end());
+//  MidiControlChangeCallback valueToRemove = {control: control, callback: fptr};
+//  this->midiControlChangeCallbacks.erase(std::remove(this->midiControlChangeCallbacks.begin(), this->midiControlChangeCallbacks.end(), valueToRemove), this->midiControlChangeCallbacks.end());
 }
 
 inline bool MidiManager::isExistControlChangeCallback(MidiControlChangeCallbackFunction fptr, byte control){
-  if ( std::find(this->midiControlChangeCallbacks.begin(), this->midiControlChangeCallbacks.end(), {control: control, callback: fptr}) != this->midiControlChangeCallbacks.end() ){
-    return true;
-  }
+//  MidiControlChangeCallback valueToCheck = {control: control, callback: fptr};
+//  if ( std::find(this->midiControlChangeCallbacks.begin(), this->midiControlChangeCallbacks.end(), valueToCheck) != this->midiControlChangeCallbacks.end() ){
+//    return true;
+//  }
 
   return false;
 }
@@ -76,14 +84,20 @@ inline void MidiManager::update(){
   usbMIDI.read();
 }
 
-inline void handleMidiControlChange(byte channel, byte control, byte value){
+inline void MidiManager::handleMidiControlChange(byte channel, byte control, byte value){
   // This value is converted from the MIDI range of unsigned 8 bits to a signed 16 bits range to match
   // the audio library's blocks samples range. So a 0 value is now -32768.
   int16_t newValue = value * 256 - 32768;
 
-  for(MidiControlChangeCallback i : this->midiControlChangeCallbacks){
-    if(i.control == control && i.callback != nullptr){
-      i.callback(newValue);
+//  for(MidiControlChangeCallback i : getInstance()->midiControlChangeCallbacks){
+//    if(i.control == control && i.callback != nullptr){
+//      i.callback(newValue);
+//    }
+//  }
+
+  for(Input* input : Input::getAll()){
+    if(input->getMidiCC() == control){
+      input->onMidiCC(newValue);
     }
   }
 }

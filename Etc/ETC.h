@@ -1,13 +1,14 @@
 #ifndef ETC_h
 #define ETC_h
 
-#include "Input.h"
-#include "Led.h"
-#include "LedManager.h"
-
 #define ABSOLUTE_ANALOG_MIN -32768
 #define ABSOLUTE_ANALOG_MAX 32767
 #define ANALOG_RANGE 65536
+
+#include "Input.h"
+#include "MidiManager.h"
+#include "Led.h"
+#include "LedManager.h"
 
 class ETC
 {

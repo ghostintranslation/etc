@@ -7,7 +7,7 @@
 
 #include "ETC.h"
 
-//Input* input1; 
+Input* input1; 
 Led* led1;
 
 AudioSynthWaveformSineModulated       waveform1;
@@ -23,11 +23,12 @@ void setup() {
 
 //  InputsManager::getInstance()->init();
 
+  input1 = new Input(0);
   led1 = new Led(0);
   
   AudioNoInterrupts();
 
-//  input1.setOnChange(onInputChange);
+  input1->setOnChange(onInputChange);
 //  input1.setOnGateOpen(onInputGateOpen);
 //  input1.setOnGateClose(onInputGateClose);
 
@@ -114,9 +115,7 @@ void loop() {
 }
 
 void onInputChange(Input* input){
-//  Serial.print(input->getTarget());
-//  Serial.print(" ");
-//  Serial.println(input->getValue());
+  Serial.println(input->getValue());
 }
 
 void onInputGateOpen(Input* input){

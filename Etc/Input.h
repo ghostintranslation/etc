@@ -32,6 +32,8 @@ class Input: public IO, public Registrar<Input>
     void setOnGateClose(InputCallback gateCloseCallback);
     void setMidiCC(byte midiCC);
     void setMergeMode(MergeMode mergeMode);
+    uint8_t getMidiCC();
+    void onMidiCC(int16_t value);
 
   private:
     // The number of samples the trigger has been on
@@ -48,9 +50,6 @@ class Input: public IO, public Registrar<Input>
     InputCallback changeCallback = nullptr;
     InputCallback gateOpenCallback = nullptr;
     InputCallback gateCloseCallback = nullptr;
-
-    // Midi callback
-    void onMidiCC(int16_t value);
 };
 
 inline Input::Input(byte index): IO(index, 0, NULL) {
@@ -181,12 +180,12 @@ inline void Input::setOnGateClose(InputCallback gateCloseCallback)
 
 inline void Input::setMidiCC(byte midiCC){
   // If a callback is already registered for this input, remove it
-  if(MidiManager::isExistControlChangeCallback(this->onMidiCC, this->midiCC)){
-    MidiManager::removeControlChangeCallback(this->onMidiCC, this->midiCC);
-  }
+//  if(MidiManager::getInstance()->isExistControlChangeCallback(onMidiCC, this->midiCC)){
+//    MidiManager::getInstance()->removeControlChangeCallback(onMidiCC, this->midiCC);
+//  }
 
   // Register the callback for this input on the specified CC number
-  MidiManager::addControlChangeCallback(this->onMidiCC, midiCC);
+//  MidiManager::getInstance()->addControlChangeCallback(midiCC, this);
 
   this->midiCC = midiCC;
 }
@@ -197,5 +196,9 @@ inline void Input::setMergeMode(MergeMode mergeMode){
 
 inline void Input::onMidiCC(int16_t value){
   this->midiValue = value;
+}
+
+inline uint8_t Input::getMidiCC(){
+  return this->midiCC;
 }
 #endif
