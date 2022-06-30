@@ -2,6 +2,7 @@
 #define InputsManager_h
 
 #include <DMAChannel.h>
+#include "Input.h"
 
 //typedef struct audio_block{
 //  int16_t data[AUDIO_BLOCK_SAMPLES*2];
@@ -21,7 +22,7 @@ class InputsManager
   public:
     static InputsManager *getInstance();
     void init();
-//    void update();
+    void update();
     static void dmaInterrupt();
 //    volatile audio_block* getData(byte index);
 //    audio_buffer* getBuffers(byte index);
@@ -32,6 +33,8 @@ class InputsManager
     // Singleton
     static InputsManager *instance;
     InputsManager();
+
+    elapsedMicros updateClock;
 
     void iterate();
     
@@ -256,9 +259,17 @@ pinMode(A0, INPUT);
 }
 
 
-//inline void InputsManager::update(){ 
-//  
-//}
+inline void InputsManager::update(){ 
+  if(updateClock < 22){
+    return;
+  }
+  
+  for(Input* input : Input::getAll()){
+    input->realTimeUpdate();
+  }
+
+  updateClock = 0;
+}
 
 
 //inline volatile audio_block* InputsManager::getData(byte index){

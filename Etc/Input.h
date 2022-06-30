@@ -2,7 +2,6 @@
 #define Input_h
 
 #include "IO.h"
-#include "InputsManager.h"
 #include "Registrar.h"
 
 // Forward declaration
@@ -27,6 +26,7 @@ class Input: public IO, public Registrar<Input>
     Input(byte index);
     void init();
     virtual void update(void) override;
+    void realTimeUpdate();
     void setOnChange(InputCallback changeCallback);
     void setOnGateOpen(InputCallback gateOpenCallback);
     void setOnGateClose(InputCallback gateCloseCallback);
@@ -36,6 +36,9 @@ class Input: public IO, public Registrar<Input>
     void onMidiCC(int16_t value);
 
   private:
+    int16_t* inputBuffer;
+    uint8_t bufferIndex;
+
     // The number of samples the trigger has been on
     byte triggerOnSamples = 0;
 
@@ -85,21 +88,23 @@ inline void Input::update(void) {
   int16_t* inputBuffer = InputsManager::getInstance()->readInput(this->index);
 
   if (inputBuffer != NULL) {
+    this->inputBuffer = inputBuffer;
+    this->bufferIndex = 0;
+  
     for (unsigned int i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
-      //      Serial.println(inputBuffer[i]);
 
       // Raw output
       block->data[i] = inputBuffer[i];
 
       // Trigger output
-      if (inputBuffer[i] > INT16_MAX / 2 && triggerOnSamples == 0) {
+      if (inputBuffer[i] > 0 && triggerOnSamples == 0) {
         triggerOnSamples++;
       }
 
       if (triggerOnSamples > 0 && triggerOnSamples < 128) {
         triggerBlock->data[i] = INT16_MAX;
       } else {
-        triggerBlock->data[i] = 0;
+        triggerBlock->data[i] = INT16_MIN;
       }
 
       if (triggerOnSamples >= 128) {
@@ -107,12 +112,35 @@ inline void Input::update(void) {
       }
 
       // Gate output
-      gateBlock->data[i] = inputBuffer[i] > INT16_MAX / 2 ? INT16_MAX : 0; // 32767 / 2
+      gateBlock->data[i] = inputBuffer[i] > 0 ? INT16_MAX : INT16_MIN;
 
+      // TODO: MAKE AN AVERAGE MEMBER?
       // Aproximated moving average
-      this->target -= this->target / AUDIO_BLOCK_SAMPLES;
-      this->target += block->data[i] / AUDIO_BLOCK_SAMPLES;
+      // this->target -= this->target / AUDIO_BLOCK_SAMPLES;
+      // this->target += block->data[i] / AUDIO_BLOCK_SAMPLES;
     }
+
+    transmit(block, 0);
+    transmit(triggerBlock, 1);
+    transmit(gateBlock, 2);
+  }
+
+  release(block);
+  release(triggerBlock);
+  release(gateBlock);
+}
+
+
+/**
+ * This is called every 22us to consume the buffer
+ */
+inline void Input::realTimeUpdate() {
+    if(this->bufferIndex >= AUDIO_BLOCK_SAMPLES || this->inputBuffer == NULL){
+      return;
+    }
+    
+    // Setting target with next sample
+    this->target = this->inputBuffer[this->bufferIndex++];
 
     // Merging the ADC and Midi values to form the target value
     switch(this->mergeMode){
@@ -125,7 +153,7 @@ inline void Input::update(void) {
         this->target += this->midiValue;
       break;
     }
-
+    
     // Triggering Gate
     if (this->gateOpenCallback != nullptr) {
       if (this->value > 0 && this->prevValue < 0) {
@@ -143,15 +171,6 @@ inline void Input::update(void) {
     }
 
     this->prevValue = this->value;
-
-    transmit(block, 0);
-    transmit(triggerBlock, 1);
-    transmit(gateBlock, 2);
-  }
-
-  release(block);
-  release(triggerBlock);
-  release(gateBlock);
 }
 
 /**

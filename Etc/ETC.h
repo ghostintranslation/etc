@@ -9,6 +9,7 @@
 #include "MidiManager.h"
 #include "Led.h"
 #include "LedManager.h"
+#include "InputsManager.h"
 
 class ETC
 {
@@ -21,15 +22,15 @@ class ETC
     static ETC *instance;
     ETC();
 
-    IntervalTimer updateTimer;
+    // IntervalTimer updateTimer;
 };
 
 // Singleton pre init
 ETC * ETC::instance = nullptr;
 
 inline ETC::ETC(){
-  updateTimer.begin(ETC::update, 4000);
-  updateTimer.priority(255);
+  // updateTimer.begin(ETC::update, 4000);
+  // updateTimer.priority(255);
 }
 
 /**
@@ -42,9 +43,8 @@ inline ETC *ETC::getInstance() {
 }
 
 inline void ETC::update(){
-  noInterrupts();
+  InputManager::getInstance()->update();
   LedManager::getInstance()->update();
-  interrupts();
 }
 
 
