@@ -22,6 +22,7 @@ class ETC
     static ETC *instance;
     ETC();
 
+    elapsedMicros updateClock;
     // IntervalTimer updateTimer;
 };
 
@@ -43,7 +44,14 @@ inline ETC *ETC::getInstance() {
 }
 
 inline void ETC::update(){
-  InputManager::getInstance()->update();
+//  InputManager::getInstance()->update();
+  if(getInstance()->updateClock >= 22){
+    for(Input* input : Input::getAll()){
+      input->realTimeUpdate();
+    }
+    getInstance()->updateClock = 0;
+  }
+  
   LedManager::getInstance()->update();
 }
 

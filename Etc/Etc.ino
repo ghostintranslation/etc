@@ -23,8 +23,10 @@ void setup() {
 
 //  InputsManager::getInstance()->init();
 
-  input1 = new Input(0);
+  input1 = new Input(1);
+  input1->setSmoothing(0);
   led1 = new Led(0);
+//  led1->setSmoothing(0);
   
   AudioNoInterrupts();
 
@@ -33,9 +35,9 @@ void setup() {
 //  input1.setOnGateClose(onInputGateClose);
 
   led1->setStatus(Led::Status::On);
-  led1->setSmoothing(100);
+//  led1->setSmoothing(100);
   
-  waveform1.frequency(0.5);
+  waveform1.frequency(1);
   waveform1.amplitude(1);
 //  waveform1.begin(WAVEFORM_TRIANGLE);
 
@@ -46,6 +48,7 @@ void setup() {
 //  new AudioConnection(waveform1, 0, i2s1, 0);
 //  new AudioConnection(waveform1, 0, i2s1, 1);
 
+//  new AudioConnection(*input1, 0, *led1, 0);
   new AudioConnection(waveform1, 0, *led1, 0);
 
   
@@ -68,7 +71,7 @@ void setup() {
 elapsedMillis consoleClock;
 byte data595 = 0;
 void loop() {
-  
+  ETC::update();
 
 //  if(consoleClock >= 20){
 //    Serial.println(led1->getValue());

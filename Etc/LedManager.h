@@ -17,12 +17,12 @@ class LedManager
     LedManager();
 
     // Update clock
-    elapsedMillis clockUpdate;
-    const unsigned int intervalClockUpdate = 8; // 8ms period = 120Hz
+    elapsedMicros clockUpdate;
+    const unsigned int intervalClockUpdate = 100; // 8ms period = 120Hz
 
     // PWM clock
-    elapsedMillis clockPWM;
-    const unsigned int intervalPWM = 16; // 16ms period = 60Hz
+    elapsedMicros clockPWM;
+    const unsigned int intervalPWM = 8000; // 16ms period = 60Hz
 
     uint8_t ledsData = 0;
     
@@ -57,6 +57,8 @@ inline void LedManager::update(){
     }
 }
 
+//elapsedMicros clockTest;
+
 inline void LedManager::writeLeds()
 {
     // Preparing the shift register data
@@ -66,9 +68,9 @@ inline void LedManager::writeLeds()
     if(Led::getCount() == 0){
         return;
     }
-
     // Preparing the LEDs data
     for(uint8_t i = 0; i < Led::getCount(); i++){
+//      Serial.println((float)this->clockPWM / this->intervalPWM);
         if (Led::get(i)->getValue() == ABSOLUTE_ANALOG_MIN)
         {
             continue;
@@ -78,17 +80,28 @@ inline void LedManager::writeLeds()
             bitSet(ledsData, Led::get(i)->getIndex());
         }
         // The value is a int16_t, offseting it to uint16_t in order to run this comparison
-        else if ((float)this->clockPWM / this->intervalPWM < (float)(Led::get(i)->getValue() + ABSOLUTE_ANALOG_MAX) / (ABSOLUTE_ANALOG_MAX*2))
+        else if ((float)this->clockPWM / this->intervalPWM < pow(((float)Led::get(i)->getValue() + (float)ABSOLUTE_ANALOG_MAX) / (ABSOLUTE_ANALOG_MAX*2),4))
         {
             bitSet(ledsData, Led::get(i)->getIndex());
         }
     }
+
+//if(this->ledsData == 1 && ledsData == 0){
+//  Serial.println(clockTest);
+//}
+//if(this->ledsData == 0 && ledsData == 1){
+//  clockTest = 0;
+//}
+
+//    Serial.println(pow(((float)Led::get(0)->getBrightness() + (float)ABSOLUTE_ANALOG_MAX) / (ABSOLUTE_ANALOG_MAX*2),4));
 
     // Reduce SPI use by not pushing data if not necessary
     if(this->ledsData == ledsData){
         return;
     }
   
+//Serial.println(bitRead(ledsData, 0)*5);
+
     // Set the latch to low (activate the shift registers)
     digitalWrite(REGISTERS_LATCH_PIN, LOW);
     

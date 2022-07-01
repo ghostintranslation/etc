@@ -3,6 +3,7 @@
 
 #include "IO.h"
 #include "Registrar.h"
+#include "InputsManager.h"
 
 // Forward declaration
 class Input;
@@ -34,8 +35,11 @@ class Input: public IO, public Registrar<Input>
     void setMergeMode(MergeMode mergeMode);
     uint8_t getMidiCC();
     void onMidiCC(int16_t value);
+    void setBuffer(int16_t* buffer);
 
   private:
+    elapsedMicros updateClock;
+    
     int16_t* inputBuffer;
     uint8_t bufferIndex;
 
@@ -56,9 +60,7 @@ class Input: public IO, public Registrar<Input>
 };
 
 inline Input::Input(byte index): IO(index, 0, NULL) {
-  // TODO: Move code of the init in the constructor so it executes only once?
   InputsManager::getInstance()->init();
-
 }
 
 inline void Input::update(void) {
@@ -84,12 +86,11 @@ inline void Input::update(void) {
   //  }
 
   //  int16_t* inputBuffer = InputsManager::getInstance()->getBuffers(this->index)->read();
-
+//
   int16_t* inputBuffer = InputsManager::getInstance()->readInput(this->index);
 
   if (inputBuffer != NULL) {
-    this->inputBuffer = inputBuffer;
-    this->bufferIndex = 0;
+    this->setBuffer(inputBuffer);
   
     for (unsigned int i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
 
@@ -134,7 +135,7 @@ inline void Input::update(void) {
 /**
  * This is called every 22us to consume the buffer
  */
-inline void Input::realTimeUpdate() {
+inline void Input::realTimeUpdate() { 
     if(this->bufferIndex >= AUDIO_BLOCK_SAMPLES || this->inputBuffer == NULL){
       return;
     }
@@ -219,5 +220,15 @@ inline void Input::onMidiCC(int16_t value){
 
 inline uint8_t Input::getMidiCC(){
   return this->midiCC;
+}
+
+//elapsedMicros testClock;
+inline void Input::setBuffer(int16_t* buffer){
+//  TODO: THERE IS A TIMING ISSUE
+//  Serial.println(testClock);
+//  testClock = 0;
+
+  this->inputBuffer = buffer;
+  this->bufferIndex = 0;
 }
 #endif

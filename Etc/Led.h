@@ -20,15 +20,16 @@ class Led: public IO, public Registrar<Led>
     
     Led(byte index);
     void update(void) override;
-    void set(Led::Status status, uint16_t brightness);
+    void set(Led::Status status, int16_t brightness);
     void setStatus(Led::Status status);
-    void setBrightness(uint16_t brightness);
+    void setBrightness(int16_t brightness);
+    int16_t getBrightness();
 
   private:
     audio_block_t *inputQueueArray[1];
     uint16_t target = 0;
     uint16_t value = 0;
-    uint16_t brightness = ABSOLUTE_ANALOG_MAX;
+    int16_t brightness = ABSOLUTE_ANALOG_MAX;
 
     Status status = Off;
 
@@ -50,15 +51,11 @@ inline void Led::update(void) {
   if (block){
     for (uint8_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
       int16_t x = block->data[i];
-      
-      // Cutting off negative values
-      if(x < 0){
-        x = 0;
-      }
   
       // Aproximated moving average
       this->brightness -= this->brightness / AUDIO_BLOCK_SAMPLES;
       this->brightness += x / AUDIO_BLOCK_SAMPLES;
+//      this->brightness = x;
     }
   
     release(block);
@@ -70,7 +67,7 @@ inline void Led::update(void) {
   case Blink:
     if (this->blickClock % 400 < 200)
     {
-      this->setTarget(0);
+      this->setTarget(INT16_MIN);
     }
     else
     {
@@ -80,7 +77,7 @@ inline void Led::update(void) {
   case BlinkFast:
     if (this->blickClock % 200 < 100)
     {
-      this->setTarget(0);
+      this->setTarget(INT16_MIN);
     }
     else
     {
@@ -90,7 +87,7 @@ inline void Led::update(void) {
   case BlinkOnce:
     if (this->blickClock > 100)
     {
-      this->setTarget(0);
+      this->setTarget(INT16_MIN);
     }else{
       this->setTarget(this->brightness);
     }
@@ -102,7 +99,7 @@ inline void Led::update(void) {
   }
 }
 
-inline void Led::set(Led::Status status, uint16_t brightness) {
+inline void Led::set(Led::Status status, int16_t brightness) {
   this->setStatus(status);
   this->setBrightness(brightness);
 }
@@ -123,13 +120,11 @@ inline void Led::setStatus(Led::Status status) {
   }
 }
 
-inline void Led::setBrightness(uint16_t brightness) {
-  // Limiting the brightness value
-  if(brightness > ABSOLUTE_ANALOG_MAX){
-    brightness = ABSOLUTE_ANALOG_MAX;
-  }
-
+inline void Led::setBrightness(int16_t brightness) {
   this->brightness = brightness;
 }
 
+inline int16_t Led::getBrightness() {
+  return this->brightness;
+}
 #endif
