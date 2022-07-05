@@ -3,39 +3,39 @@
 
 #include "AudioStream.h"
 
-class IO: public AudioStream
+class IO : public AudioStream
 {
-  public:
-    IO(uint8_t index, uint8_t numberOfInputsPorts, audio_block_t **iqueue);
-    virtual void update(void);
-    virtual uint8_t getIndex();
-    virtual int16_t getValue();
-    virtual void setValue(int16_t value);
-    virtual int16_t getTarget();
-    virtual void setTarget(int16_t target);
-    virtual void setSmoothing(uint16_t smoothing);
+public:
+  IO(uint8_t index, uint8_t numberOfInputsPorts, audio_block_t **iqueue);
+  virtual void update(void);
+  virtual uint8_t getIndex();
+  virtual int16_t getValue();
+  virtual void setValue(int16_t value);
+  virtual int16_t getTarget();
+  virtual void setTarget(int16_t target);
+  virtual void setSmoothing(uint16_t smoothing);
 
-  protected:
-    uint8_t index;
-    int16_t value = 0;
-    int16_t prevValue = 0;
-    int16_t target = 0;
-    uint16_t smoothing = 10;
-
+protected:
+  uint8_t index = 0;
+  int16_t value = 0;
+  int16_t prevValue = 0;
+  int16_t target = 0;
+  uint16_t smoothing = 10;
 };
 
-
-inline IO::IO(uint8_t index, uint8_t numberOfInputsPorts, audio_block_t **iqueue): AudioStream(numberOfInputsPorts, iqueue) {
+inline IO::IO(uint8_t index, uint8_t numberOfInputsPorts, audio_block_t **iqueue) : AudioStream(numberOfInputsPorts, iqueue)
+{
   this->index = index;
-  if (this->index > 8) {
+  if (this->index > 8)
+  {
     this->index = 8;
   }
 
   this->active = true;
 }
 
-
-inline void IO::update(void) {
+inline void IO::update(void)
+{
   // Update the value to reach the target
   if (this->target != this->value)
   {
@@ -47,8 +47,7 @@ inline void IO::update(void) {
     else
     {
       // time (ms) between each update = 1000 / AUDIO_SAMPLE_RATE_EXACT * 128 = 2.9
-      this->value += (((float)1 / this->smoothing) * (this->target - this->value))
-                     * (1000 / AUDIO_SAMPLE_RATE_EXACT * 128);
+      this->value += (((float)1 / this->smoothing) * (this->target - this->value)) * (1000 / AUDIO_SAMPLE_RATE_EXACT * 128);
     }
   }
 }
@@ -65,7 +64,8 @@ inline void IO::update(void) {
 
    @param int16_t smoothing The smoothing.
 */
-inline void IO::setSmoothing(uint16_t smoothing) {
+inline void IO::setSmoothing(uint16_t smoothing)
+{
   this->smoothing = smoothing;
 }
 
@@ -89,7 +89,8 @@ inline int16_t IO::getValue()
 
    @param int16_t value The value.
 */
-inline void IO::setValue(int16_t value) {
+inline void IO::setValue(int16_t value)
+{
   this->value = value;
 }
 

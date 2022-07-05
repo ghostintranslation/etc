@@ -1,18 +1,15 @@
 #include <Audio.h>
-#include <SPI.h>
 
-#define REGISTERS_LATCH_PIN 9
-#define SPI_CLOCK_PIN 13
-#define SPI_MOSI_PIN 11
+#include "Test.h"
 
-#include "ETC.h"
+//Input* input1; 
+//Led* led1;
 
-Input* input1; 
-Led* led1;
-
-AudioSynthWaveformSineModulated       waveform1;
+//AudioSynthWaveformSineModulated       waveform1;
 AudioOutputI2S           i2s1;
 AudioControlSGTL5000     sgtl5000_1;     //xy=930,518
+
+Test* test = Test::getInstance();
 
 void setup() {
   AudioMemory(20);
@@ -20,25 +17,27 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 5000) ;
 
+//  input1 = new Input(1);
+//  ETC::init();
 
-//  InputsManager::getInstance()->init();
-
-  input1 = new Input(1);
-  input1->setSmoothing(0);
-  led1 = new Led(0);
+//  input1 = new Input(1);
+//  input1->setSmoothing(0);
+//  led1 = new Led(0);
 //  led1->setSmoothing(0);
+
+  test->init();
   
   AudioNoInterrupts();
 
-  input1->setOnChange(onInputChange);
+//  input1->setOnChange(onInputChange);
 //  input1.setOnGateOpen(onInputGateOpen);
 //  input1.setOnGateClose(onInputGateClose);
 
-  led1->setStatus(Led::Status::On);
+//  led1->setStatus(Led::Status::On);
 //  led1->setSmoothing(100);
   
-  waveform1.frequency(1);
-  waveform1.amplitude(1);
+//  waveform1.frequency(1);
+//  waveform1.amplitude(1);
 //  waveform1.begin(WAVEFORM_TRIANGLE);
 
 
@@ -49,21 +48,21 @@ void setup() {
 //  new AudioConnection(waveform1, 0, i2s1, 1);
 
 //  new AudioConnection(*input1, 0, *led1, 0);
-  new AudioConnection(waveform1, 0, *led1, 0);
+//  new AudioConnection(waveform1, 0, *led1, 0);
 
   
   sgtl5000_1.enable();
   sgtl5000_1.volume(1);
-
-  pinMode(REGISTERS_LATCH_PIN, OUTPUT);
-  pinMode(SPI_CLOCK_PIN, OUTPUT);
-  pinMode(SPI_MOSI_PIN, OUTPUT);
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE0);
-  SPI.setClockDivider(SPI_CLOCK_DIV2);
-  SPI.setSCK(SPI_CLOCK_PIN);
-  SPI.setMOSI(SPI_MOSI_PIN);
-  SPI.begin();
+//
+//  pinMode(REGISTERS_LATCH_PIN, OUTPUT);
+//  pinMode(SPI_CLOCK_PIN, OUTPUT);
+//  pinMode(SPI_MOSI_PIN, OUTPUT);
+//  SPI.setBitOrder(MSBFIRST);
+//  SPI.setDataMode(SPI_MODE0);
+//  SPI.setClockDivider(SPI_CLOCK_DIV2);
+//  SPI.setSCK(SPI_CLOCK_PIN);
+//  SPI.setMOSI(SPI_MOSI_PIN);
+//  SPI.begin();
   
   AudioInterrupts();
 }
@@ -71,7 +70,7 @@ void setup() {
 elapsedMillis consoleClock;
 byte data595 = 0;
 void loop() {
-  ETC::update();
+  test->update();
 
 //  if(consoleClock >= 20){
 //    Serial.println(led1->getValue());
@@ -118,7 +117,7 @@ void loop() {
 }
 
 void onInputChange(Input* input){
-  Serial.println(input->getValue());
+//  Serial.println(input->getValue());
 }
 
 void onInputGateOpen(Input* input){

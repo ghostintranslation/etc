@@ -1,8 +1,6 @@
 #ifndef LedManager_h
 #define LedManager_h
 
-#include <SPI.h>
-
 #include "Led.h"
 
 class LedManager
